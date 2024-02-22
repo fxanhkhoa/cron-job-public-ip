@@ -24,7 +24,7 @@ cron.schedule(`* * ${process.env.HOUR} * *`, async () => {
 	console.log("CRON START:");
     const ip = await getPublicIP();
 	sendToDiscord(ip);
-});
+}).start();
 
 const main = async () => {
 	const ip = await getPublicIP();
