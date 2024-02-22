@@ -20,7 +20,7 @@ const getPublicIP = async () => {
 	return result.data;
 };
 
-cron.schedule(`* * ${process.env.HOUR} * *`, async () => {
+cron.schedule(`0 */1 * * *`, async () => {
 	console.log("CRON START:");
     const ip = await getPublicIP();
 	sendToDiscord(ip);
