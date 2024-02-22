@@ -4,6 +4,6 @@
 
 FROM node:20-alpine As production
 
-RUN npm install ci
+RUN npm ci
 
 CMD [ "node", "index.js" ]
