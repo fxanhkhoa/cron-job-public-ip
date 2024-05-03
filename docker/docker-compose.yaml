@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  g2b-api:
+    image: fxanhkhoa/cron-job-public-ip:latest
+    container_name: cron-job-public-ip
+    restart: always
+    ports:
+      - 3007:3000
+    env_file:
+      - .env
