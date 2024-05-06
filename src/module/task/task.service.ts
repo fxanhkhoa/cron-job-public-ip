@@ -107,13 +107,13 @@ export class TaskService {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   handleCron() {
-    this.logger.debug('Called every 10 minutes');
+    console.log('Called every 10 minutes');
     this.processIPToDomain();
   }
 
   @Cron(CronExpression.EVERY_HOUR)
   handleGetIPCron() {
-    this.logger.debug('Called every 1 hour');
+    console.log('Called every 1 hour');
     this.getPublicIP();
   }
 
