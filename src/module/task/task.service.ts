@@ -114,7 +114,7 @@ export class TaskService {
   @Cron(CronExpression.EVERY_HOUR)
   handleGetIPCron() {
     console.log('Called every 1 hour');
-    this.getPublicIP();
+    this.processGetIP();
   }
 
   sendToDiscord(message: string) {
