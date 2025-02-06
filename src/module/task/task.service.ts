@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { AxiosResponse } from 'axios';
-import { Observable, concatMap, firstValueFrom, forkJoin } from 'rxjs';
+import { Observable, concatMap, firstValueFrom, forkJoin, of } from 'rxjs';
 import {
   CloudflareDomain,
   CloudflareZone,
@@ -35,6 +35,7 @@ export class TaskService {
       .replaceAll(' ', '')
       .split(',');
     const ip = await firstValueFrom(this.getPublicIP());
+    let cloudflareZones: CloudflareZone;
     this.http
       .get<CloudflareZone>('https://api.cloudflare.com/client/v4/zones', {
         headers: {
@@ -43,6 +44,7 @@ export class TaskService {
       })
       .pipe(
         concatMap((zones) => {
+          cloudflareZones = zones.data;
           return forkJoin(
             listZones.map((z) => {
               const zoneID = zones.data.result.find((e) => e.name === z).id;
@@ -62,13 +64,18 @@ export class TaskService {
             let foundDomain: SingleCloudflareDomain;
             domainsResponse.forEach((e) => {
               if (e.data.result.find((f) => f.name === name)) {
+                // console.log(e.data.result);
                 foundDomain = e.data.result.find((f) => f.name === name);
               }
             });
             if (foundDomain && foundDomain.content !== ip.data) {
+              const zoneID = cloudflareZones.result.find((e) =>
+                foundDomain.name.includes(e.name),
+              ).id;
+              console.log(zoneID);
               listObservable.push(
                 this.http.patch<PatchDNSResponse>(
-                  `https://api.cloudflare.com/client/v4/zones/${foundDomain.zone_id}/dns_records/${foundDomain.id}`,
+                  `https://api.cloudflare.com/client/v4/zones/${zoneID}/dns_records/${foundDomain.id}`,
                   {
                     content: ip.data,
                   },
@@ -79,7 +86,6 @@ export class TaskService {
               );
             }
           });
-          console.log(listObservable.length);
           return forkJoin(listObservable);
         }),
       )
