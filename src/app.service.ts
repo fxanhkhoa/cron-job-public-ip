@@ -29,7 +29,7 @@ export class AppService {
    * 5. x-forwarded
    * 6. forwarded-for
    * 7. forwarded
-   * 8. request.ip (fallback)
+   * 8. request.ip (fallback, cleaned)
    */
   getClientPublicIp(headers: any, requestIp?: string): string {
     // Check x-real-ip (most reliable for reverse proxies like nginx)
@@ -68,7 +68,20 @@ export class AppService {
 
     // Fallback to request.ip if available
     if (requestIp) {
-      return requestIp;
+      // Clean up IPv6 localhost and IPv4-mapped IPv6 addresses
+      let cleanIp = requestIp;
+
+      // Remove IPv6 prefix for IPv4-mapped addresses (::ffff:192.168.1.1 -> 192.168.1.1)
+      if (cleanIp.startsWith('::ffff:')) {
+        cleanIp = cleanIp.substring(7);
+      }
+
+      // Convert IPv6 localhost to IPv4 localhost for consistency
+      if (cleanIp === '::1') {
+        cleanIp = '127.0.0.1';
+      }
+
+      return cleanIp;
     }
 
     return '';
