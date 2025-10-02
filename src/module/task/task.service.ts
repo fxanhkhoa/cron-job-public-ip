@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { AxiosResponse } from 'axios';
-import { Observable, concatMap, firstValueFrom, forkJoin, of } from 'rxjs';
+import { Observable, concatMap, firstValueFrom, forkJoin } from 'rxjs';
 import {
   CloudflareDomain,
   CloudflareZone,
@@ -18,6 +18,11 @@ export class TaskService {
     private http: HttpService,
     private config: ConfigService,
   ) {
+    const enableCronjobs = this.config.get<boolean>('enableCronjobs');
+    if (!enableCronjobs) {
+      this.logger.warn('Cronjobs are disabled');
+      return;
+    }
     this.processGetIP();
     this.processIPToDomain();
   }
@@ -113,12 +118,22 @@ export class TaskService {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   handleCron() {
+    const enableCronjobs = this.config.get<boolean>('enableCronjobs');
+    if (!enableCronjobs) {
+      this.logger.warn('Cronjobs are disabled');
+      return;
+    }
     console.log('Called every 10 minutes');
     this.processIPToDomain();
   }
 
   @Cron(CronExpression.EVERY_HOUR)
   handleGetIPCron() {
+    const enableCronjobs = this.config.get<boolean>('enableCronjobs');
+    if (!enableCronjobs) {
+      this.logger.warn('Cronjobs are disabled');
+      return;
+    }
     console.log('Called every 1 hour');
     this.processGetIP();
   }

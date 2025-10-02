@@ -8,4 +8,5 @@ export default () => ({
     zoneNames: process.env.CLOUDFLARE_ZONES ?? '',
     domains: process.env.CLOUDFLARE_DOMAINS_EDIT ?? '',
   },
+  enableCronjobs: process.env.ENABLE_CRONJOBS === 'true',
 });
